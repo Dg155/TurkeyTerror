@@ -5,14 +5,16 @@ using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private float speed = 1;
     [SerializeField] private AudioSource source;
-
     private Rigidbody2D rb;
+    private Health healthScript;
+    private bool isDashing = false;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        healthScript = GetComponent<Health>();
     }
 
     // Update is called once per frame
@@ -35,21 +37,38 @@ public class PlayerMovement : MonoBehaviour
         {
             movementDir += new Vector2(1, 0);
         }
-        rb.velocity = movementDir.normalized * speed;
-    }
+        rb.velocity = movementDir.normalized * 6;
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag.Equals("Enemy"))
+        // Check for left mouse button click
+        if (Input.GetMouseButtonDown(0) && !isDashing)
         {
-            source.Play();
-            Time.timeScale = 0;
-            StartCoroutine(lose());
+            // Start the dash coroutine with the mouse position as the target
+            Vector3 targetPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Dash(targetPosition);
         }
+
     }
 
-    IEnumerator lose()
+    void Dash(Vector3 targetPosition)
     {
+        isDashing = true;
+
+        Vector3 startPos = transform.position;
+
+        Vector3 dashDirection = (targetPosition - startPos).normalized;
+
+        // Change the multiplied value to a "dash speed" variable
+        Vector3 endPos = startPos + dashDirection * 6;
+
+        transform.position = endPos;
+
+        isDashing = false;
+    }
+
+    public IEnumerator lose()
+    {
+        source.Play();
+        Time.timeScale = 0;
         yield return new WaitForSecondsRealtime(1f);
         SceneManager.LoadSceneAsync("LoseScene");
     }
