@@ -11,6 +11,8 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private List<GameObject> patrolPoints;
 
+    // Add a damage amount variable to pass into subtract health
+
     void Start()
     {
         turkey = FindAnyObjectByType<PlayerMovement>().gameObject;
@@ -36,5 +38,13 @@ public class Enemy : MonoBehaviour
     private void Update()
     {
         state = state.OnUpdate();
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag.Equals("Turkey"))
+        {
+            collision.gameObject.GetComponent<Health>().SubtractHealth();
+        }
     }
 }
